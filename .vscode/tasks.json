@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Sketch",
+      "type": "shell",
+      "command": "javac -cp lib/core.jar -d bin src/Sketch.java && java -cp bin:lib/core.jar Sketch",
+      "windows": {
+        "command": "javac -cp lib\\core.jar -d bin src\\Sketch.java && java -cp bin;lib\\core.jar Sketch",
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": ["/C"]
+          }
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "panel": "shared",
+        "clear": true,
+        "reveal": "always"
+      }
+    }
+  ]
+}
