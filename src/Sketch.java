@@ -10,6 +10,7 @@ public class Sketch extends PApplet {
     ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
     int randomIndex;
+    boolean playerTurn = true; 
 
     int [] deck = {1,2,3,4,5,6,7,8,9,10,10,10,10};
     String [] cardName = {"1", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
@@ -42,25 +43,53 @@ public class Sketch extends PApplet {
     @Override
     public void draw() {
         gameStart();
-        hitOrStay();
+        playerAndDealerTurn();
     }
 
     private void gameStart(){
         background(0);  //Black 
         fill(255);
         textSize(20);
-        text("You have: " + playerHand.get(0) + " and " + playerHand.get(1) + ", sum: " + getSum(playerHand), 20, 30);
-        text("The dealer has: " + dealerHand.get(0) + " and " + "[?]", 20, 60);
-        text("Would you like to hit or stay? (h/s)", 20, 90);
+        println();
+        println("=========Black Jack=========");
+        println();
     }
 
-    private void hitOrStay() {
-        if (key == '1') {
-            text("hit", 20, 120);
+    private void playerAndDealerTurn(){
+        if (playerTurn){
+            playerTurn();
         }
-        if (key == '2'){
-            text("stay", 20, 120);
+        else {
+            while (getSum(dealerHand)<17){
+               dealerTurn(); 
+            }
         }
+    }
+
+    public void keyPressed() {
+        if (key == 'h' & playerTurn) {
+            playerHand.add(deck[randomDeckIndex()]); 
+        }
+        if (key == 's' & playerTurn){
+            playerTurn = false;
+        }
+    }
+
+    private void playerTurn(){
+        fill(255);
+        textSize(20);
+        text("You have: " + playerHand + ", sum: " + getSum(playerHand), 20, 30);
+        text("The dealer has: " + dealerHand.get(0) + " and " + "[?]", 20, 60);
+        text("Would you like to hit or stay? (h/s)", 20, 90);
+        playerTurn = true;
+    }
+
+    private void dealerTurn(){
+        fill(255);
+        textSize(20);
+        text("You have: " + playerHand + ", sum: " + getSum(playerHand), 20, 30);
+        text("The dealer reveals " + dealerHand + getSum(dealerHand), 20, 60);
+        dealerHand.add(deck[randomDeckIndex()]);
     }
 
     private int getSum(ArrayList <Integer> hand){
