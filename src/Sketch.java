@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 /**
  * Template for programs with Processing graphics output.
- * @author Your Name
+ * @author Collin Jin
  */
 public class Sketch extends PApplet {
     ArrayList <Integer> playerHand = new ArrayList<Integer>(); // Special kind of array which grows/shrinks based on # of values
@@ -41,19 +41,34 @@ public class Sketch extends PApplet {
 
     @Override
     public void draw() {
+        gameStart();
+        hitOrStay();
+    }
+
+    private void gameStart(){
         background(0);  //Black 
         fill(255);
         textSize(20);
-        text(playerHand + " " + dealerHand, 20, 30);
+        text("You have: " + playerHand.get(0) + " and " + playerHand.get(1) + ", sum: " + getSum(playerHand), 20, 30);
+        text("The dealer has: " + dealerHand.get(0) + " and " + "[?]", 20, 60);
+        text("Would you like to hit or stay? (h/s)", 20, 90);
     }
 
-    // public void keyPressed() {
-    //     if (key == '1') {
-    //         verticalSpeed1 -= 10; // Gives ball upward boost
-    //     }
-    //     if (key == '2'){
-    //         verticalSpeed2 -= 10; 
-    //     }
-    // }
+    private void hitOrStay() {
+        if (key == '1') {
+            text("hit", 20, 120);
+        }
+        if (key == '2'){
+            text("stay", 20, 120);
+        }
+    }
+
+    private int getSum(ArrayList <Integer> hand){
+        int sum = 0; 
+        for (int card : hand){
+            sum += card;
+        }
+        return sum;
+    }
 
 }
