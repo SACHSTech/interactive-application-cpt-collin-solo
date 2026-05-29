@@ -44,6 +44,10 @@ public class Sketch extends PApplet {
     public void draw() {
         gameStart();
         playerAndDealerTurn();
+        
+        if(determineWinner()){
+
+        }
     }
 
     private void gameStart(){
@@ -90,6 +94,26 @@ public class Sketch extends PApplet {
         text("You have: " + playerHand + ", sum: " + getSum(playerHand), 20, 30);
         text("The dealer reveals " + dealerHand + getSum(dealerHand), 20, 60);
         dealerHand.add(deck[randomDeckIndex()]);
+    }
+
+    private boolean determineWinner(){
+        boolean playerWon;
+        if (getSum(playerHand)==21||getSum(dealerHand)>21){
+            playerWon = true;
+        }
+        else if(getSum(playerHand)>21||getSum(dealerHand)==21){
+            playerWon = false;
+        }
+        else if (getSum(playerHand)>getSum(dealerHand)){
+            playerWon = true;
+        }
+        else{
+            playerWon = false;
+        }
+
+        if (playerWon) {
+            
+        }
     }
 
     private int getSum(ArrayList <Integer> hand){
