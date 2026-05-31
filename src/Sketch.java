@@ -12,9 +12,10 @@ public class Sketch extends PApplet {
     int randomIndex;
     boolean playerTurn = true; 
 
-    int [] deck = {1,2,3,4,5,6,7,8,9,10,10,10,10};
-    String [] cardName = {"1", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
+    int [] deck = {11,2,3,4,5,6,7,8,9,10,10,10,10};
+    String [] cardName = {"Ace", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
     int card; 
+    int aceCount = 0;
 
 
     public static void main(String[] args) {
@@ -117,6 +118,13 @@ public class Sketch extends PApplet {
         int sum = 0; 
         for (int card : hand){
             sum += card;
+            if (card == 11){
+                aceCount++;
+            }
+
+            while (sum > 21 && aceCount > 0){
+                sum -= 10;
+            }
         }
         return sum;
     }
