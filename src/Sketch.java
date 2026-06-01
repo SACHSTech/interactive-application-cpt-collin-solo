@@ -11,6 +11,7 @@ public class Sketch extends PApplet {
 
     int randomIndex;
     boolean playerTurn = true; 
+    boolean wouldYouLikePlayAgain = false;
 
     int [] deck = {11,2,3,4,5,6,7,8,9,10,10,10,10};
     String [] cardName = {"Ace", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
@@ -33,17 +34,11 @@ public class Sketch extends PApplet {
 
     @Override
     public void setup() {
-        randomIndex = randomDeckIndex();
-        for (int i = 0; i < 2; i++){
-            playerHand.add(deck[randomDeckIndex()]); // Adds random card
-            dealerHand.add(deck[randomDeckIndex()]);
-        }
+        gameStart();
     }
-
 
     @Override
     public void draw() {
-        gameStart();
         playerAndDealerTurn();
     }
 
@@ -54,6 +49,10 @@ public class Sketch extends PApplet {
         println();
         println("=========Black Jack=========");
         println();
+        for (int i = 0; i < 2; i++){
+            playerHand.add(deck[randomDeckIndex()]); // Adds random card
+            dealerHand.add(deck[randomDeckIndex()]);
+        }
     }
 
     private void playerAndDealerTurn(){
@@ -75,6 +74,14 @@ public class Sketch extends PApplet {
         }
         if (key == 's' && playerTurn){
             playerTurn = false;
+        }
+        if (key == 'y' && wouldYouLikePlayAgain){
+            wouldYouLikePlayAgain();
+            wouldYouLikePlayAgain = false;
+        }
+        if (key == 'n' && wouldYouLikePlayAgain){
+            text("THANKS FOR PLAYING", 20, 150);
+            wouldYouLikePlayAgain = false;
         }
     }
 
@@ -112,6 +119,9 @@ public class Sketch extends PApplet {
             playerWon = false;
             text("HOUSE WINS " , 20, 90);
         }
+
+        wouldYouLikePlayAgain = true; 
+        text("Would You like to Play Again? (y/n)" , 20, 120);
     }
 
     private int getSum(ArrayList <Integer> hand){
@@ -135,6 +145,14 @@ public class Sketch extends PApplet {
         textSize(20);
         text("You have: " + playerHand + ", sum: " + getSum(playerHand), 20, 30);
         text("The dealer reveals " + dealerHand + getSum(dealerHand), 20, 60);
+    }
+
+    private void wouldYouLikePlayAgain(){       
+        playerHand.clear();
+        dealerHand.clear();
+        gameStart();
+        playerAndDealerTurn();
+        playerTurn = true;
     }
 
 }
