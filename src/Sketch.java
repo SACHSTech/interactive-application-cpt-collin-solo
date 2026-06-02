@@ -6,18 +6,21 @@ import java.util.ArrayList;
  * @author Collin Jin
  */
 public class Sketch extends PApplet {
-    ArrayList <Integer> playerHand = new ArrayList<Integer>(); 
-    ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
+    // Game Setup
     boolean playerTurn = true; 
     boolean wouldYouLikePlayAgain = false;
     String gameMessage = "Would you like to hit or stay? (h/s)";
     int playerSum;
     int dealerSum;
 
+    // Cards and Deck
     int [] deck = {11,2,3,4,5,6,7,8,9,10,10,10,10};
     String [] cardName = {"Ace", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
     int card; 
+
+    ArrayList <Integer> playerHand = new ArrayList<Integer>(); 
+    ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
 
     public static void main(String[] args) {
@@ -37,7 +40,7 @@ public class Sketch extends PApplet {
 
     @Override
     public void draw() {
-        showHands();
+        showHandsAndGameMessage();                      
     }
 
     private void gameStart(){
@@ -48,25 +51,27 @@ public class Sketch extends PApplet {
             dealerHand.add(deck[randomDeckIndex()]);
         }
 
-        playerSum = getSum(playerHand);                 // Updates hand sums
+        playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands 
         dealerSum = getSum(dealerHand);
 
-        if (playerSum >= 21 || dealerSum >= 21){        // Checks for if anyone was dealt 21 
-            playerTurn = false;
+        if (playerSum >= 21 || dealerSum >= 21){        // Checks for if anyone was sum of 21 
+            playerTurn = false;                        
             determineWinner();
         }
     }
 
-    private void showHands(){
+    private void showHandsAndGameMessage(){
+
         background(0);
-        playerSum = getSum(playerHand);
+
+        playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands
         dealerSum = getSum(dealerHand);
 
         fill(255);
         textSize(20);
         text("You have: " + playerHand + ", sum: " + playerSum, 20, 30);
 
-        if (playerTurn){
+        if (playerTurn){                                                                // On the player's turn the dealer only reveals on card
             text("The dealer reveals " + dealerHand.get(0) + " and [?] ", 20, 60);
         }
         else {
