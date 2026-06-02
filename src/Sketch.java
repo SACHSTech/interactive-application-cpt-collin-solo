@@ -22,6 +22,12 @@ public class Sketch extends PApplet {
     ArrayList <Integer> playerHand = new ArrayList<Integer>(); 
     ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
+    //Card Visuals
+    int cardX = 100;
+    int cardY = 700;
+    int cardWidth = 150;
+    int cardHeight = 200;
+
 
     public static void main(String[] args) {
         PApplet.main("Sketch");
@@ -34,7 +40,7 @@ public class Sketch extends PApplet {
 
     @Override
     public void setup() {
-        background(0);  //Black 
+        background(21, 115, 63);  //Green felt colour
         gameStart();
     }
 
@@ -62,7 +68,7 @@ public class Sketch extends PApplet {
 
     private void showHandsAndGameMessage(){
 
-        background(0);
+        background(21, 115, 63);
 
         playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands
         dealerSum = getSum(dealerHand);
@@ -70,6 +76,8 @@ public class Sketch extends PApplet {
         fill(255);
         textSize(20);
         text("You have: " + playerHand + ", sum: " + playerSum, 20, 30);
+
+        cardsVisual(playerHand);
 
         if (playerTurn){                                                                // On the player's turn the dealer only reveals on card
             text("The dealer reveals " + dealerHand.get(0) + " and [?] ", 20, 60);
@@ -81,65 +89,92 @@ public class Sketch extends PApplet {
         text(gameMessage, 20, 90);
     }
 
+    private void cardsVisual(ArrayList <Integer> hand){
+        cardX = 100;
+        for (int cardValue : hand){
+            fill(255,255,255);
+
+            int deckIndex = 0;
+            for (int i = 0; i < deck.length; i++){
+                if (cardValue == deck[i]){
+                    deckIndex = i;
+                }
+            }
+            rect(cardX, cardY, cardWidth, cardHeight);
+
+            int cardCenterX = cardX + (cardWidth/2);
+            int cardCenterY = cardY + (cardHeight/2);
+
+            fill(0);
+            text(cardName[deckIndex], cardCenterX, cardCenterY);
+
+            cardX += 200;
+        }
+    }
+
     public void keyPressed() {
-        if (key == 'h' && playerTurn) {
+
+        if (key == 'h' && playerTurn) {                 // Player presses H to hit
             playerHand.add(deck[randomDeckIndex()]); 
             playerSum = getSum(playerHand);
 
-            if (playerSum >= 21){
+            if (playerSum >= 21){                       // Skips player next turn if their sum is 21 or greater
                 dealerTurn();
             }
         }
-        if (key == 's' && playerTurn){
-            background(0);
+
+        if (key == 's' && playerTurn){                  // Player presses S to stay
+            background(21, 115, 63);
             playerTurn = false;
             dealerTurn();
         }
-        if (key == 'y' && wouldYouLikePlayAgain){
+
+        if (key == 'y' && wouldYouLikePlayAgain){       // Player presses Y to play again 
             wouldYouLikePlayAgain();
             wouldYouLikePlayAgain = false;
         }
-        if (key == 'n' && wouldYouLikePlayAgain){
+
+        if (key == 'n' && wouldYouLikePlayAgain){       // Player presses N to exit game 
             text("THANKS FOR PLAYING", 20, 150);
             wouldYouLikePlayAgain = false;
         }
     }
 
     private void dealerTurn(){
-        dealerSum = getSum(dealerHand);
-        while (dealerSum < 17){
+        dealerSum = getSum(dealerHand);                 // Update dealer hand sum
+        while (dealerSum < 17){                         // Hits while the dealer's sum is less than 17
             dealerHand.add(deck[randomDeckIndex()]);
             dealerSum = getSum(dealerHand);
         } 
-        determineWinner();
+        determineWinner();                        
     }
 
     private void determineWinner(){
         boolean playerWon;
-        playerSum = getSum(playerHand);
+        playerSum = getSum(playerHand);                 // Updates sum of dealer & player hands
         dealerSum = getSum(dealerHand);
         
-        if (playerSum > 21){
+        if (playerSum > 21){                            // Player busts = Loss
             playerWon = false;
             gameMessage = "HOUSE WINS ";
         }
-        else if (playerSum == 21||dealerSum > 21){
+        else if (playerSum == 21||dealerSum > 21){      // Dealer bust/Player has 21 = Win 
             playerWon = true;
             gameMessage = "WINNER WINNER WINNER";
         } 
-        else if(playerSum > 21|| dealerSum == 21){
+        else if(dealerSum == 21){                       // Dealer has 21 = Loss
             playerWon = false;
             gameMessage = "HOUSE WINS ";
         } 
-        else if(playerSum == dealerSum){
+        else if(playerSum == dealerSum){                // Dealer has same as player = Push
             playerWon = false;
             gameMessage = "TIE, Bets have been returned ";
         } 
-        else if (playerSum > dealerSum){
+        else if (playerSum > dealerSum){                // If no bust and player > dealer = Win
             playerWon = true;
             gameMessage = "WINNER WINNER WINNER";
         }
-        else{
+        else{                                           // If no bust and dealer > player = Loss
             playerWon = false;
             gameMessage = "HOUSE WINS ";
         }
@@ -153,11 +188,11 @@ public class Sketch extends PApplet {
         int aceCount = 0;
         for (int card : hand){
             sum += card;
-            if (card == 11){
+            if (card == 11){                            // Checks if card is ace
                 aceCount++;
             }
 
-            while (sum > 21 && aceCount > 0){
+            while (sum > 21 && aceCount > 0){           // if the player has ace and busts then ace value changes to 1 
                 sum -= 10;
                 aceCount--;
             }
