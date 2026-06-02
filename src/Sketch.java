@@ -6,10 +6,9 @@ import java.util.ArrayList;
  * @author Collin Jin
  */
 public class Sketch extends PApplet {
-    ArrayList <Integer> playerHand = new ArrayList<Integer>(); // Special kind of array which grows/shrinks based on # of values
+    ArrayList <Integer> playerHand = new ArrayList<Integer>(); 
     ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
-    int randomIndex;
     boolean playerTurn = true; 
     boolean wouldYouLikePlayAgain = false;
     String gameMessage = "Would you like to hit or stay? (h/s)";
@@ -23,10 +22,6 @@ public class Sketch extends PApplet {
 
     public static void main(String[] args) {
         PApplet.main("Sketch");
-    }
-
-    private int randomDeckIndex(){
-        return((int)(Math.random() * deck.length));
     }
 
     @Override
@@ -46,9 +41,6 @@ public class Sketch extends PApplet {
     }
 
     private void gameStart(){
-        fill (255);
-        textSize(20);
-        text(gameMessage, 20, 90);
         playerTurn = true;
 
         for (int i = 0; i < 2; i++){                    // Draws 2 random cards for dealer and player
@@ -56,10 +48,12 @@ public class Sketch extends PApplet {
             dealerHand.add(deck[randomDeckIndex()]);
         }
 
-        if (playerSum >= 21 || dealerSum >= 21){        // Checks for immediate winner
+        playerSum = getSum(playerHand);                 // Updates hand sums
+        dealerSum = getSum(dealerHand);
+
+        if (playerSum >= 21 || dealerSum >= 21){        // Checks for if anyone was dealt 21 
             playerTurn = false;
             determineWinner();
-            
         }
     }
 
@@ -79,7 +73,7 @@ public class Sketch extends PApplet {
             text("The dealer reveals " + dealerHand + ", sum: " + dealerSum, 20, 60);
         }
 
-        text(gameMessage, 20, 110);
+        text(gameMessage, 20, 90);
     }
 
     public void keyPressed() {
@@ -107,6 +101,7 @@ public class Sketch extends PApplet {
     }
 
     private void dealerTurn(){
+        dealerSum = getSum(dealerHand);
         while (dealerSum < 17){
             dealerHand.add(deck[randomDeckIndex()]);
             dealerSum = getSum(dealerHand);
@@ -119,7 +114,11 @@ public class Sketch extends PApplet {
         playerSum = getSum(playerHand);
         dealerSum = getSum(dealerHand);
         
-        if (playerSum == 21||dealerSum > 21){
+        if (playerSum > 21){
+            playerWon = false;
+            gameMessage = "HOUSE WINS ";
+        }
+        else if (playerSum == 21||dealerSum > 21){
             playerWon = true;
             gameMessage = "WINNER WINNER WINNER";
         } 
@@ -155,6 +154,7 @@ public class Sketch extends PApplet {
 
             while (sum > 21 && aceCount > 0){
                 sum -= 10;
+                aceCount--;
             }
         }
         return sum;
@@ -164,6 +164,11 @@ public class Sketch extends PApplet {
         playerHand.clear();
         dealerHand.clear();
         gameStart();
+        gameMessage = "Would you like to hit or stay? (h/s)";
+    }
+    
+    private int randomDeckIndex(){
+        return((int)(Math.random() * deck.length));
     }
 
 }
