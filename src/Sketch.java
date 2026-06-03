@@ -14,6 +14,7 @@ public class Sketch extends PApplet {
     String gameMessage = "Would you like to hit or stay? (h/s)";
     int playerSum;
     int dealerSum;
+    int gameState = 0;
 
     // Cards and Deck
 
@@ -50,21 +51,39 @@ public class Sketch extends PApplet {
 
     @Override
     public void setup() {
-        background(21, 115, 63);  //Green felt colour
-        gameStart();
+        if (gameState == 0){
+        }
+        else if (gameState == 1){
+            background(21, 115, 63);  //Green felt colour
+            gameStart();
+        }
     }
 
     @Override
     public void draw() {
-        showHandsAndGameMessage();                      
+        if (gameState == 0){
+            welcomeScreen();
+        }
+        else if (gameState == 1){
+            showHandsAndGameMessage();   
+        }
+                          
+    }
+
+    private void welcomeScreen(){
+        background(0);
+        textAlign(CENTER, CENTER);
+        fill(255);
+        textSize(50);
+        text("WELCOME TO COLLINS POKER ROOM", 600, 500);
+        text("PRESS B TO PLAY: ", 600, 700);        
     }
 
     private void gameStart(){
         playerTurn = true;
 
-        // INSIDE gameStart()
         for (int i = 0; i < 2; i++){                    
-            playerHand.add(randomDeckIndex());          // Store the INDEX instead of card value
+            playerHand.add(randomDeckIndex());          // Store the INDEX of card value
             playerCardXPosition.add((float)-200.0);
 
             dealerHand.add(randomDeckIndex());    
@@ -109,8 +128,8 @@ public class Sketch extends PApplet {
             int deckIndex = hand.get(i);
             float currentX = cardPositionX.get(i);
 
-            currentX += (targetXPosition - currentX) * (float)cardSpeed; // The card moves 10% of the remaining distance from the target every frame. (LERP)
-            cardPositionX.set(i, currentX);                        // Updates the cards X position
+            currentX += (targetXPosition - currentX) * (float)cardSpeed;  // The card moves 10% of the remaining distance from the target every frame. (LERP)
+            cardPositionX.set(i, currentX);                               // Updates the cards X position
 
 
             // Draws card
@@ -162,6 +181,11 @@ public class Sketch extends PApplet {
         if (key == 'n' && wouldYouLikePlayAgain){       // Player presses N to exit game 
             text("THANKS FOR PLAYING", 20, 150);
             wouldYouLikePlayAgain = false;
+        }
+
+        if (key == 'b' && gameState == 0){
+            gameState = 1; 
+            gameStart();
         }
     }
 
