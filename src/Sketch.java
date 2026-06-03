@@ -52,9 +52,10 @@ public class Sketch extends PApplet {
     private void gameStart(){
         playerTurn = true;
 
-        for (int i = 0; i < 2; i++){                    // Draws 2 random cards for dealer and player
-            playerHand.add(deck[randomDeckIndex()]); 
-            dealerHand.add(deck[randomDeckIndex()]);
+        // INSIDE gameStart()
+        for (int i = 0; i < 2; i++){                    
+            playerHand.add(randomDeckIndex());          // Store the INDEX instead of card value
+            dealerHand.add(randomDeckIndex());    
         }
 
         playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands 
@@ -72,12 +73,17 @@ public class Sketch extends PApplet {
 
         playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands
         dealerSum = getSum(dealerHand);
+        
+        cardsVisual(playerHand);
+        cardY = 200;
+        cardsVisual(dealerHand);
+        cardY = 700;
+
+        textAlign(LEFT, TOP);
 
         fill(255);
         textSize(20);
         text("You have: " + playerHand + ", sum: " + playerSum, 20, 30);
-
-        cardsVisual(playerHand);
 
         if (playerTurn){                                                                // On the player's turn the dealer only reveals on card
             text("The dealer reveals " + dealerHand.get(0) + " and [?] ", 20, 60);
@@ -89,23 +95,18 @@ public class Sketch extends PApplet {
         text(gameMessage, 20, 90);
     }
 
-    private void cardsVisual(ArrayList <Integer> hand){
+    private void cardsVisual(ArrayList<Integer> hand){
         cardX = 100;
-        for (int cardValue : hand){
-            fill(255,255,255);
+        for (int deckIndex : hand){
+            fill(255, 255, 255);
+            rect(cardX, cardY, cardWidth, cardHeight);  
 
-            int deckIndex = 0;
-            for (int i = 0; i < deck.length; i++){
-                if (cardValue == deck[i]){
-                    deckIndex = i;
-                }
-            }
-            rect(cardX, cardY, cardWidth, cardHeight);
+            int cardCenterX = cardX + (cardWidth / 2);
+            int cardCenterY = cardY + (cardHeight / 2);
 
-            int cardCenterX = cardX + (cardWidth/2);
-            int cardCenterY = cardY + (cardHeight/2);
-
+            // Uses the index of stored in hand to find card name
             fill(0);
+            textAlign(CENTER, CENTER);                              // Centers the text on card
             text(cardName[deckIndex], cardCenterX, cardCenterY);
 
             cardX += 200;
@@ -114,11 +115,11 @@ public class Sketch extends PApplet {
 
     public void keyPressed() {
 
-        if (key == 'h' && playerTurn) {                 // Player presses H to hit
-            playerHand.add(deck[randomDeckIndex()]); 
+        if (key == 'h' && playerTurn) {                 
+            playerHand.add(randomDeckIndex());           // Player presses H to hit
             playerSum = getSum(playerHand);
 
-            if (playerSum >= 21){                       // Skips player next turn if their sum is 21 or greater
+             if (playerSum >= 21){                       // Skips player next turn if their sum is 21 or greater
                 dealerTurn();
             }
         }
@@ -183,16 +184,17 @@ public class Sketch extends PApplet {
         wouldYouLikePlayAgain = true;
     }
 
-    private int getSum(ArrayList <Integer> hand){
+    private int getSum(ArrayList<Integer> hand){
         int sum = 0; 
         int aceCount = 0;
-        for (int card : hand){
-            sum += card;
-            if (card == 11){                            // Checks if card is ace
+        for (int deckIndex : hand){
+            int cardValue = deck[deckIndex];            // Translate the index back to its score value
+            sum += cardValue;
+            if (cardValue == 11){                            
                 aceCount++;
             }
 
-            while (sum > 21 && aceCount > 0){           // if the player has ace and busts then ace value changes to 1 
+            while (sum > 21 && aceCount > 0){           
                 sum -= 10;
                 aceCount--;
             }
