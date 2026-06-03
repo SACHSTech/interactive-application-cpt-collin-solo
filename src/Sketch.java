@@ -22,12 +22,17 @@ public class Sketch extends PApplet {
     ArrayList <Integer> playerHand = new ArrayList<Integer>(); 
     ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
+    ArrayList <Float> playerCardXPosition = new ArrayList<Float>();
+
     //Card Visuals
     int cardX = 100;
     int cardY = 700;
     int cardWidth = 150;
     int cardHeight = 200;
 
+    int targetXPosition;
+    int cardSpacing = 200;
+    float cardSpeed = (float)0.1;
 
     public static void main(String[] args) {
         PApplet.main("Sketch");
@@ -55,6 +60,7 @@ public class Sketch extends PApplet {
         // INSIDE gameStart()
         for (int i = 0; i < 2; i++){                    
             playerHand.add(randomDeckIndex());          // Store the INDEX instead of card value
+            playerCardXPosition.add((float)-200.0);
             dealerHand.add(randomDeckIndex());    
         }
 
@@ -75,33 +81,30 @@ public class Sketch extends PApplet {
         dealerSum = getSum(dealerHand);
         
         cardsVisual(playerHand);
-        cardY = 200;
-        cardsVisual(dealerHand);
-        cardY = 700;
 
         textAlign(LEFT, TOP);
-
         fill(255);
-        textSize(20);
-        text("You have: " + playerHand + ", sum: " + playerSum, 20, 30);
+        textSize(40);
 
-        if (playerTurn){                                                                // On the player's turn the dealer only reveals on card
-            text("The dealer reveals " + dealerHand.get(0) + " and [?] ", 20, 60);
-        }
-        else {
-            text("The dealer reveals " + dealerHand + ", sum: " + dealerSum, 20, 60);
-        }
-
-        text(gameMessage, 20, 90);
+        text("Your sum: " + getSum(playerHand), 20, 10);
+        text("Dealer sum: " + getSum(dealerHand), 20, 60);
+        text(gameMessage, 20, 110);
     }
 
     private void cardsVisual(ArrayList<Integer> hand){
-        cardX = 100;
-        for (int deckIndex : hand){
-            fill(255, 255, 255);
-            rect(cardX, cardY, cardWidth, cardHeight);  
+        targetXPosition = 100;
 
-            int cardCenterX = cardX + (cardWidth / 2);
+        for ( int i = 0; i < hand.size(); i++){
+            int deckIndex = hand.get(i);
+            float currentX = playerCardXPosition.get(i);
+
+            currentX += (targetXPosition - currentX) * (float)cardSpeed; // The card moves 10% of the remaining distance from the target every frame. 
+            playerCardXPosition.set(i, currentX);
+
+            fill(255, 255, 255);
+            rect(currentX, cardY, cardWidth, cardHeight);  
+
+            float cardCenterX = currentX + (cardWidth / 2);
             int cardCenterY = cardY + (cardHeight / 2);
 
             // Uses the index of stored in hand to find card name
@@ -109,18 +112,23 @@ public class Sketch extends PApplet {
             textAlign(CENTER, CENTER);                              // Centers the text on card
             text(cardName[deckIndex], cardCenterX, cardCenterY);
 
-            cardX += 200;
+            targetXPosition += cardSpacing;                                 // 
+
         }
+
     }
 
     public void keyPressed() {
 
         if (key == 'h' && playerTurn) {                 
             playerHand.add(randomDeckIndex());           // Player presses H to hit
+            playerCardXPosition.add((float)-200.0);
+
             playerSum = getSum(playerHand);
 
              if (playerSum >= 21){                       // Skips player next turn if their sum is 21 or greater
-                dealerTurn();
+                determineWinner();
+                playerTurn = false;
             }
         }
 
@@ -144,7 +152,7 @@ public class Sketch extends PApplet {
     private void dealerTurn(){
         dealerSum = getSum(dealerHand);                 // Update dealer hand sum
         while (dealerSum < 17){                         // Hits while the dealer's sum is less than 17
-            dealerHand.add(deck[randomDeckIndex()]);
+            dealerHand.add(randomDeckIndex());
             dealerSum = getSum(dealerHand);
         } 
         determineWinner();                        
@@ -205,6 +213,7 @@ public class Sketch extends PApplet {
     private void wouldYouLikePlayAgain(){
         playerHand.clear();
         dealerHand.clear();
+        playerCardXPosition.clear();
         gameStart();
         gameMessage = "Would you like to hit or stay? (h/s)";
     }
