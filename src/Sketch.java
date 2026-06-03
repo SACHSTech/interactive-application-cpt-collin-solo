@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class Sketch extends PApplet {
 
     // Game Setup
+
     boolean playerTurn = true; 
     boolean wouldYouLikePlayAgain = false;
     String gameMessage = "Would you like to hit or stay? (h/s)";
@@ -15,6 +16,7 @@ public class Sketch extends PApplet {
     int dealerSum;
 
     // Cards and Deck
+
     int [] deck = {11,2,3,4,5,6,7,8,9,10,10,10,10};
     String [] cardName = {"Ace", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
     int card; 
@@ -22,9 +24,8 @@ public class Sketch extends PApplet {
     ArrayList <Integer> playerHand = new ArrayList<Integer>(); 
     ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
-    ArrayList <Float> playerCardXPosition = new ArrayList<Float>();
-
     //Card Visuals
+
     int cardX = 100;
     int cardY = 700;
     int cardWidth = 150;
@@ -33,6 +34,10 @@ public class Sketch extends PApplet {
     int targetXPosition;
     int cardSpacing = 200;
     float cardSpeed = (float)0.1;
+    
+    ArrayList <Float> playerCardXPosition = new ArrayList<Float>();
+    ArrayList <Float> dealerCardXPosition = new ArrayList<Float>();
+
 
     public static void main(String[] args) {
         PApplet.main("Sketch");
@@ -61,7 +66,9 @@ public class Sketch extends PApplet {
         for (int i = 0; i < 2; i++){                    
             playerHand.add(randomDeckIndex());          // Store the INDEX instead of card value
             playerCardXPosition.add((float)-200.0);
+
             dealerHand.add(randomDeckIndex());    
+            dealerCardXPosition.add((float)-200.0);
         }
 
         playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands 
@@ -80,8 +87,12 @@ public class Sketch extends PApplet {
         playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands
         dealerSum = getSum(dealerHand);
         
-        cardsVisual(playerHand);
+        cardsVisual(playerHand, playerCardXPosition);
+        cardY = 200;
+        cardsVisual(dealerHand, dealerCardXPosition);
+        cardY = 700;
 
+        // Realigns text and displays dealer and player sum
         textAlign(LEFT, TOP);
         fill(255);
         textSize(40);
@@ -91,28 +102,33 @@ public class Sketch extends PApplet {
         text(gameMessage, 20, 110);
     }
 
-    private void cardsVisual(ArrayList<Integer> hand){
+    private void cardsVisual(ArrayList<Integer> hand, ArrayList<Float> cardPositionX){
         targetXPosition = 100;
 
         for ( int i = 0; i < hand.size(); i++){
             int deckIndex = hand.get(i);
-            float currentX = playerCardXPosition.get(i);
+            float currentX = cardPositionX.get(i);
 
-            currentX += (targetXPosition - currentX) * (float)cardSpeed; // The card moves 10% of the remaining distance from the target every frame. 
-            playerCardXPosition.set(i, currentX);
+            currentX += (targetXPosition - currentX) * (float)cardSpeed; // The card moves 10% of the remaining distance from the target every frame. (LERP)
+            cardPositionX.set(i, currentX);                        // Updates the cards X position
 
+
+            // Draws card
             fill(255, 255, 255);
             rect(currentX, cardY, cardWidth, cardHeight);  
 
+
+            // finds the center X and Y coordinate for the text on card
             float cardCenterX = currentX + (cardWidth / 2);
             int cardCenterY = cardY + (cardHeight / 2);
 
+
             // Uses the index of stored in hand to find card name
             fill(0);
-            textAlign(CENTER, CENTER);                              // Centers the text on card
+            textAlign(CENTER, CENTER);                              // Centers text on card
             text(cardName[deckIndex], cardCenterX, cardCenterY);
 
-            targetXPosition += cardSpacing;                                 // 
+            targetXPosition += cardSpacing;                         // after a card has arrived, shifts the targetX position for the next card
 
         }
 
@@ -133,7 +149,7 @@ public class Sketch extends PApplet {
         }
 
         if (key == 's' && playerTurn){                  // Player presses S to stay
-            background(21, 115, 63);
+            background(21, 115, 63);                    // Moves to dealer turn
             playerTurn = false;
             dealerTurn();
         }
@@ -152,8 +168,12 @@ public class Sketch extends PApplet {
     private void dealerTurn(){
         dealerSum = getSum(dealerHand);                 // Update dealer hand sum
         while (dealerSum < 17){                         // Hits while the dealer's sum is less than 17
+
             dealerHand.add(randomDeckIndex());
+            dealerCardXPosition.add((float)-200.0);
+
             dealerSum = getSum(dealerHand);
+
         } 
         determineWinner();                        
     }
