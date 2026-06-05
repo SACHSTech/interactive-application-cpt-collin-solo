@@ -1,5 +1,6 @@
 import processing.core.PApplet;
 import java.util.ArrayList;
+import processing.core.PFont;
 
 /**
  * Template for programs with Processing graphics output.
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 public class Sketch extends PApplet {
 
     // Game Setup
-
     boolean playerTurn = true; 
     boolean wouldYouLikePlayAgain = false;
     String gameMessage = "Would you like to hit or stay? (h/s)";
@@ -17,7 +17,6 @@ public class Sketch extends PApplet {
     int gameState = 0;
 
     // Cards and Deck
-
     int [] deck = {11,2,3,4,5,6,7,8,9,10,10,10,10};
     String [] cardName = {"Ace", "2","3", "4","5","6","7","8","9","10", "Jack", "Queen", "King"};
     int card; 
@@ -26,7 +25,6 @@ public class Sketch extends PApplet {
     ArrayList <Integer> dealerHand = new ArrayList<Integer>();
 
     //Card Visuals
-
     int cardX = 100;
     int cardY = 700;
     int cardWidth = 150;
@@ -39,6 +37,9 @@ public class Sketch extends PApplet {
     ArrayList <Float> playerCardXPosition = new ArrayList<Float>();
     ArrayList <Float> dealerCardXPosition = new ArrayList<Float>();
 
+    // Array of card suit symbols
+    String[] suits = {"♠", "♥", "♦", "♣"};
+    PFont cardFont; // Global font configuration variable
 
     public static void main(String[] args) {
         PApplet.main("Sketch");
@@ -51,12 +52,8 @@ public class Sketch extends PApplet {
 
     @Override
     public void setup() {
-        if (gameState == 0){
-        }
-        else if (gameState == 1){
-            background(21, 115, 63);  //Green felt colour
-            gameStart();
-        }
+        background(0);
+        cardFont = createFont("Arial", 64, true);
     }
 
     @Override
@@ -67,11 +64,11 @@ public class Sketch extends PApplet {
         else if (gameState == 1){
             showHandsAndGameMessage();   
         }
-                          
     }
 
     private void welcomeScreen(){
         background(0);
+        textFont(cardFont); // Use loaded font asset safely
         textAlign(CENTER, CENTER);
         fill(255);
         textSize(50);
@@ -83,152 +80,154 @@ public class Sketch extends PApplet {
         playerTurn = true;
 
         for (int i = 0; i < 2; i++){                    
-            playerHand.add(randomDeckIndex());          // Store the INDEX of card value
+            playerHand.add(randomDeckIndex());         // Store the INDEX of card value 
             playerCardXPosition.add((float)-200.0);
 
             dealerHand.add(randomDeckIndex());    
             dealerCardXPosition.add((float)-200.0);
         }
 
-        playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands 
+        playerSum = getSum(playerHand);               // Updates sum of dealer and player hands    
         dealerSum = getSum(dealerHand);
 
-        if (playerSum >= 21 || dealerSum >= 21){        // Checks for if anyone was sum of 21 
+        if (playerSum >= 21 || dealerSum >= 21){          // Checks for if anyone was sum of 21 
             playerTurn = false;                        
             determineWinner();
         }
     }
 
     private void showHandsAndGameMessage(){
-
         background(21, 115, 63);
 
-        playerSum = getSum(playerHand);                 // Updates sum of dealer and player hands
+        playerSum = getSum(playerHand);                  // Updates sum of dealer and player hands
         dealerSum = getSum(dealerHand);
         
+        cardY = 700;
         cardsVisual(playerHand, playerCardXPosition);
+        
         cardY = 200;
         cardsVisual(dealerHand, dealerCardXPosition);
-        cardY = 700;
 
         // Realigns text and displays dealer and player sum
         textAlign(LEFT, TOP);
         fill(255);
         textSize(40);
 
-        text("Your sum: " + getSum(playerHand), 20, 10);
-        text("Dealer sum: " + getSum(dealerHand), 20, 60);
+        text("Your sum: " + playerSum, 20, 10);
+        text("Dealer sum: " + dealerSum, 20, 60);
         text(gameMessage, 20, 110);
     }
 
     private void cardsVisual(ArrayList<Integer> hand, ArrayList<Float> cardPositionX){
         targetXPosition = 100;
 
-        for ( int i = 0; i < hand.size(); i++){
+        for (int i = 0; i < hand.size(); i++){
             int deckIndex = hand.get(i);
             float currentX = cardPositionX.get(i);
 
             currentX += (targetXPosition - currentX) * (float)cardSpeed;  // The card moves 10% of the remaining distance from the target every frame. (LERP)
-            cardPositionX.set(i, currentX);                               // Updates the cards X position
-
+            cardPositionX.set(i, currentX);                              
 
             // Draws card
+            stroke(180);
+            strokeWeight(1);
             fill(255, 255, 255);
-            rect(currentX, cardY, cardWidth, cardHeight);  
+            rect(currentX, cardY, cardWidth, cardHeight, 8);  
+            noStroke();
 
+            // Alternate suits systematically based on deck configuration
+            String suit = suits[deckIndex % 4];
+            
+            // Card colours based on suit
+            if (suit.equals("♥") || suit.equals("♦")) {
+                fill(220, 30, 30); // red
+            } else {
+                fill(0, 0, 0);     // black
+            }
+
+            // Draw Corner Rank & Suit Indicator 
+            textFont(cardFont);
+            textAlign(LEFT, TOP);
+            textSize(18);
+            text(cardName[deckIndex] + " " + suit, currentX + 10, cardY + 10);
 
             // finds the center X and Y coordinate for the text on card
-            float cardCenterX = currentX + (cardWidth / 2);
-            int cardCenterY = cardY + (cardHeight / 2);
+            float cardCenterX = currentX + (cardWidth / 2.0f);
+            float cardCenterY = cardY + (cardHeight / 2.0f);
 
+            textAlign(CENTER, CENTER);
+            textSize(65); 
+            text(suit, cardCenterX, cardCenterY + 10);
 
-            // Uses the index of stored in hand to find card name
-            fill(0);
-            textAlign(CENTER, CENTER);                              // Centers text on card
-            text(cardName[deckIndex], cardCenterX, cardCenterY);
-
-            targetXPosition += cardSpacing;                         // after a card has arrived, shifts the targetX position for the next card
-
+            targetXPosition += cardSpacing;                         
         }
-
     }
 
     public void keyPressed() {
+        if (key == 'b' && gameState == 0){
+            gameState = 1; 
+            gameStart();
+        }
 
         if (key == 'h' && playerTurn) {                 
-            playerHand.add(randomDeckIndex());           // Player presses H to hit
+            playerHand.add(randomDeckIndex());           
             playerCardXPosition.add((float)-200.0);
 
             playerSum = getSum(playerHand);
 
-             if (playerSum >= 21){                       // Skips player next turn if their sum is 21 or greater
+             if (playerSum >= 21){                       
                 determineWinner();
                 playerTurn = false;
             }
         }
 
-        if (key == 's' && playerTurn){                  // Player presses S to stay
-            background(21, 115, 63);                    // Moves to dealer turn
+        if (key == 's' && playerTurn){                  
+            background(21, 115, 63);                    
             playerTurn = false;
             dealerTurn();
         }
 
-        if (key == 'y' && wouldYouLikePlayAgain){       // Player presses Y to play again 
+        if (key == 'y' && wouldYouLikePlayAgain){       
             wouldYouLikePlayAgain();
             wouldYouLikePlayAgain = false;
         }
 
-        if (key == 'n' && wouldYouLikePlayAgain){       // Player presses N to exit game 
+        if (key == 'n' && wouldYouLikePlayAgain){       
             text("THANKS FOR PLAYING", 20, 150);
             wouldYouLikePlayAgain = false;
-        }
-
-        if (key == 'b' && gameState == 0){
-            gameState = 1; 
-            gameStart();
         }
     }
 
     private void dealerTurn(){
-        dealerSum = getSum(dealerHand);                 // Update dealer hand sum
-        while (dealerSum < 17){                         // Hits while the dealer's sum is less than 17
-
+        dealerSum = getSum(dealerHand);                 
+        while (dealerSum < 17){                         
             dealerHand.add(randomDeckIndex());
             dealerCardXPosition.add((float)-200.0);
-
             dealerSum = getSum(dealerHand);
-
         } 
         determineWinner();                        
     }
 
     private void determineWinner(){
-        boolean playerWon;
-        playerSum = getSum(playerHand);                 // Updates sum of dealer & player hands
+        playerSum = getSum(playerHand);                 
         dealerSum = getSum(dealerHand);
         
-        if (playerSum > 21){                            // Player busts = Loss
-            playerWon = false;
+        if (playerSum > 21){                            
             gameMessage = "HOUSE WINS ";
         }
-        else if (playerSum == 21||dealerSum > 21){      // Dealer bust/Player has 21 = Win 
-            playerWon = true;
+        else if (playerSum == 21 || dealerSum > 21){      
             gameMessage = "WINNER WINNER WINNER";
         } 
-        else if(dealerSum == 21){                       // Dealer has 21 = Loss
-            playerWon = false;
+        else if(dealerSum == 21){                       
             gameMessage = "HOUSE WINS ";
         } 
-        else if(playerSum == dealerSum){                // Dealer has same as player = Push
-            playerWon = false;
+        else if(playerSum == dealerSum){                
             gameMessage = "TIE, Bets have been returned ";
         } 
-        else if (playerSum > dealerSum){                // If no bust and player > dealer = Win
-            playerWon = true;
+        else if (playerSum > dealerSum){                
             gameMessage = "WINNER WINNER WINNER";
         }
-        else{                                           // If no bust and dealer > player = Loss
-            playerWon = false;
+        else{                                           
             gameMessage = "HOUSE WINS ";
         }
         
@@ -240,7 +239,7 @@ public class Sketch extends PApplet {
         int sum = 0; 
         int aceCount = 0;
         for (int deckIndex : hand){
-            int cardValue = deck[deckIndex];            // Translate the index back to its score value
+            int cardValue = deck[deckIndex];             // Translate the index back to its score value
             sum += cardValue;
             if (cardValue == 11){                            
                 aceCount++;
@@ -258,6 +257,7 @@ public class Sketch extends PApplet {
         playerHand.clear();
         dealerHand.clear();
         playerCardXPosition.clear();
+        dealerCardXPosition.clear(); 
         gameStart();
         gameMessage = "Would you like to hit or stay? (h/s)";
     }
@@ -265,5 +265,4 @@ public class Sketch extends PApplet {
     private int randomDeckIndex(){
         return((int)(Math.random() * deck.length));
     }
-
 }
