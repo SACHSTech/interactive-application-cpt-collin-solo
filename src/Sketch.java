@@ -15,6 +15,7 @@ public class Sketch extends PApplet {
     int playerSum;
     int dealerSum;
     int gameState = 0;
+    boolean displayOneCard;
 
     // Cards and Deck
     int [] deck = {11,2,3,4,5,6,7,8,9,10,10,10,10};
@@ -80,17 +81,17 @@ public class Sketch extends PApplet {
         playerTurn = true;
 
         for (int i = 0; i < 2; i++){                    
-            playerHand.add(randomDeckIndex());         // Store the INDEX of card value 
+            playerHand.add(randomDeckIndex());              // Store the INDEX of card value 
             playerCardXPosition.add((float)-200.0);
 
             dealerHand.add(randomDeckIndex());    
             dealerCardXPosition.add((float)-200.0);
         }
 
-        playerSum = getSum(playerHand);               // Updates sum of dealer and player hands    
+        playerSum = getSum(playerHand);                     // Updates sum of dealer and player hands    
         dealerSum = getSum(dealerHand);
 
-        if (playerSum >= 21 || dealerSum >= 21){          // Checks for if anyone was sum of 21 
+        if (playerSum >= 21 || dealerSum >= 21){            // Checks for if anyone was sum of 21 
             playerTurn = false;                        
             determineWinner();
         }
@@ -99,14 +100,16 @@ public class Sketch extends PApplet {
     private void showHandsAndGameMessage(){
         background(21, 115, 63);
 
-        playerSum = getSum(playerHand);                  // Updates sum of dealer and player hands
+        playerSum = getSum(playerHand);                           // Updates sum of dealer and player hands
         dealerSum = getSum(dealerHand);
         
+        // Draw Player Hand
         cardY = 700;
-        cardsVisual(playerHand, playerCardXPosition);
-        
+        cardsVisual(playerHand, playerCardXPosition, false);      // false = don't hide anything
+
+        // Draw Dealer Hand
         cardY = 200;
-        cardsVisual(dealerHand, dealerCardXPosition);
+        cardsVisual(dealerHand, dealerCardXPosition, playerTurn); // hides card faces during player turn
 
         // Realigns text and displays dealer and player sum
         textAlign(LEFT, TOP);
@@ -114,18 +117,23 @@ public class Sketch extends PApplet {
         textSize(40);
 
         text("Your sum: " + playerSum, 20, 10);
-        text("Dealer sum: " + dealerSum, 20, 60);
+        if (playerTurn){
+            text("Dealer has " + deck[dealerHand.get(0)] + " and [?]", 20, 60);
+        }
+        else {
+            text("Dealer sum: " + dealerSum, 20, 60);
+        }
         text(gameMessage, 20, 110);
     }
 
-    private void cardsVisual(ArrayList<Integer> hand, ArrayList<Float> cardPositionX){
+    private void cardsVisual(ArrayList<Integer> hand, ArrayList<Float> cardPositionX, boolean hideSecondCard){
         targetXPosition = 100;
 
         for (int i = 0; i < hand.size(); i++){
             int deckIndex = hand.get(i);
             float currentX = cardPositionX.get(i);
 
-            currentX += (targetXPosition - currentX) * (float)cardSpeed;  // The card moves 10% of the remaining distance from the target every frame. (LERP)
+            currentX += (targetXPosition - currentX) * (float)cardSpeed;  // The card moves 10% of the remaining distance from the target every frame. 
             cardPositionX.set(i, currentX);                              
 
             // Draws card
@@ -135,14 +143,26 @@ public class Sketch extends PApplet {
             rect(currentX, cardY, cardWidth, cardHeight, 8);  
             noStroke();
 
-            // Alternate suits systematically based on deck configuration
+        // If it's the dealer's turn and this isn't the first card, paint a card back design
+
+        if (hideSecondCard && i > 0) {
+            fill(40, 90, 180); // Blue card back color
+            rect(currentX + 10, cardY + 10, cardWidth - 20, cardHeight - 20, 4);
+            
+            fill(255, 150); // white accent lines
+            textAlign(CENTER, CENTER);
+            textSize(30);
+            text("?", currentX + (cardWidth / 2f), cardY + (cardHeight / 2f));
+        } 
+
+            // Otherwise, draw the normal face card 
+        else {
             String suit = suits[deckIndex % 4];
             
-            // Card colours based on suit
             if (suit.equals("♥") || suit.equals("♦")) {
-                fill(220, 30, 30); // red
+                fill(220, 30, 30); 
             } else {
-                fill(0, 0, 0);     // black
+                fill(0, 0, 0);     
             }
 
             // Draw Corner Rank & Suit Indicator 
@@ -151,13 +171,14 @@ public class Sketch extends PApplet {
             textSize(18);
             text(cardName[deckIndex] + " " + suit, currentX + 10, cardY + 10);
 
-            // finds the center X and Y coordinate for the text on card
+            // Find center points
             float cardCenterX = currentX + (cardWidth / 2.0f);
             float cardCenterY = cardY + (cardHeight / 2.0f);
 
             textAlign(CENTER, CENTER);
             textSize(65); 
             text(suit, cardCenterX, cardCenterY + 10);
+        }
 
             targetXPosition += cardSpacing;                         
         }
@@ -239,7 +260,7 @@ public class Sketch extends PApplet {
         int sum = 0; 
         int aceCount = 0;
         for (int deckIndex : hand){
-            int cardValue = deck[deckIndex];             // Translate the index back to its score value
+            int cardValue = deck[deckIndex];                        // Translate the index back to its score value
             sum += cardValue;
             if (cardValue == 11){                            
                 aceCount++;
